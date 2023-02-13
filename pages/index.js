@@ -1,44 +1,13 @@
-import { useEffect, useState } from "react";
+import Head from "next/head";
 import MeetupList from "../components/meetups/MeetupList";
-
-const dummy_meetups = [
-  {
-    id: "m1",
-    title: "first meetup",
-    address: "Some street 45, Nis",
-    description: "This is first meetup",
-    image:
-      "https://grubstreetauthor.co.uk/wp-content/uploads/2020/02/london-business-meeting-in-progress.jpg",
-  },
-  {
-    id: "m2",
-    title: "second meetup",
-    address: "Some street 45, Nis",
-    description: "This is second  meetup",
-    image:
-      "https://grubstreetauthor.co.uk/wp-content/uploads/2020/02/london-business-meeting-in-progress.jpg",
-  },
-  {
-    id: "m3",
-    title: "third meetup",
-    address: "Some street 45, Nis",
-    description: "This is third meetup",
-    image:
-      "https://grubstreetauthor.co.uk/wp-content/uploads/2020/02/london-business-meeting-in-progress.jpg",
-  },
-  {
-    id: "m4",
-    title: "fourth meetup",
-    address: "Some street 45, Nis",
-    description: "This is fourth meetup",
-    image:
-      "https://grubstreetauthor.co.uk/wp-content/uploads/2020/02/london-business-meeting-in-progress.jpg",
-  },
-];
+import API from "./api/baseUrl";
 
 const HomePage = (props) => {
   return (
     <>
+      <Head>
+        <title>Next.js Meetups vezba</title>
+      </Head>
       <MeetupList meetups={props.meetups} />
     </>
   );
@@ -55,32 +24,46 @@ const HomePage = (props) => {
 
 // revalidate sluzi da posle builda refreshuje podatke i updateuje build
 // na uneti broj sekundi, tako da ne moramo da pravimo novi build
-// export async function getStaticProps() {
-//   // fetch data from an api
+export async function getStaticProps() {
+  const response = await API.get("meetups.json");
+
+  let allMeetups = [];
+
+  for (const key in response.data) {
+    allMeetups.push({
+      address: response.data[key].address,
+      image: response.data[key].image,
+      title: response.data[key].title,
+      id: key.toString(),
+    });
+  }
+
+  return {
+    props: {
+      meetups: allMeetups,
+    },
+    revalidate: 10,
+  };
+}
+
+// ako zelim da refreshujem podatke koje page dobija pri svakom requestu
+// koristim getServerSideProps, bolje je da koristim ovaj pristup
+// ako mi se data menja vise puta u sekundi i ako mi treba request objekat (context)
+// npr za autentikaciju
+
+// export async function getServerSideProps(context) {
+//   const req = context.req;
+//   const res = context.res;
+
+//   console.log(res);
+//   console.log(req);
+
+//   // fetch data from api...
 //   return {
 //     props: {
 //       meetups: dummy_meetups,
 //     },
-//     revalidate: 10,
 //   };
 // }
-
-// ako zelim da refreshujem podatke koje page dobija pri svakom requestu
-// koristim getServerSideProps
-
-export async function getServerSideProps(context) {
-  const req = context.req;
-  const res = context.res;
-
-  console.log(res);
-  console.log(req);
-
-  // fetch data from api...
-  return {
-    props: {
-      meetups: dummy_meetups,
-    },
-  };
-}
 
 export default HomePage;

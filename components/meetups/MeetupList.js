@@ -1,5 +1,7 @@
-import MeetupItem from './MeetupItem';
-import classes from './MeetupList.module.css';
+import { useEffect } from "react";
+import API from "../../pages/api/baseUrl";
+import MeetupItem from "./MeetupItem";
+import classes from "./MeetupList.module.css";
 
 function MeetupList(props) {
   return (
